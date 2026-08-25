@@ -1,0 +1,25 @@
+﻿# Ambiente virtual
+venv/
+.venv/
+
+# Segredos e variáveis locais
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE e sistema
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.log
