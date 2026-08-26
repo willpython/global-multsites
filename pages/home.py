@@ -3,15 +3,28 @@ import streamlit as st
 from core.styles import inject_editorial_ui
 from data.niches_config import NICHES_DATABASE
 
+def inject_adcash_autotag() -> None:
+    st.html(
+        """
+        <script id="aclib" type="text/javascript"
+            src="https://acscdn.com/script/aclib.js"></script>
 
-st.set_page_config(
-    page_title="Global Multisites",
-    page_icon="◈",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+        <script type="text/javascript">
+            window.addEventListener("load", function () {
+                if (typeof aclib !== "undefined") {
+                    aclib.runAutoTag({
+                        zoneId: "ditm0vjmbq"
+                    });
+                }
+            });
+        </script>
+        """,
+        unsafe_allow_javascript=True,
+    )
 
 inject_editorial_ui()
+# Adcash: somente uma vez e antes do conteúdo visual.
+inject_adcash_autotag()
 
 with st.sidebar:
     st.markdown('<p class="brand-name">Global Multisites</p>', unsafe_allow_html=True)
