@@ -2,6 +2,7 @@ import json
 import re
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 class AdcashManager:
@@ -87,7 +88,10 @@ class AdcashManager:
         </script>
         """
 
-        st.html(
+        components.html(
             script,
-            unsafe_allow_javascript=True,
+            height=0,
+            width=0,
         )
+        st.session_state[session_key] = True
+        return True
