@@ -87,6 +87,7 @@ class AdcashManager:
         </script>
         """
 
-        st.html(script)
-        st.session_state[session_key] = True
-        return True
+        st.html(
+            script,
+            unsafe_allow_javascript=True,
+        )

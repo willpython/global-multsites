@@ -119,7 +119,15 @@ if "selected_niche" not in st.session_state:
     st.session_state.selected_niche = "ai_tech"
 
 inject_editorial_ui()
-AdcashManager.inject_autotag()
+
+adcash_injected = AdcashManager.inject_autotag()
+
+if st.secrets.get("ADCASH_DEBUG", False):
+    st.caption(
+        "AdCash diagnóstico: "
+        f"enabled={AdcashManager.is_enabled()} | "
+        f"injected={adcash_injected}"
+    )
 
 with st.sidebar:
     st.markdown(
