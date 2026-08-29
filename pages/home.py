@@ -1,9 +1,9 @@
 import streamlit as st
 from textwrap import dedent
 
+from core.adcash_engine import AdcashManager
 from core.styles import inject_editorial_ui
 from data.niches_config import NICHES_DATABASE
-from textwrap import dedent
 
 
 CATEGORY_UI = {
@@ -66,27 +66,6 @@ CATEGORY_UI = {
 }
 
 
-def inject_adcash_autotag() -> None:
-    """Carrega a biblioteca e ativa a zona Adcash somente na Home."""
-    st.html(
-        """
-        <script id="aclib" type="text/javascript"
-            src="https://acscdn.com/script/aclib.js"></script>
-
-        <script type="text/javascript">
-            window.addEventListener("load", function () {
-                if (typeof aclib !== "undefined") {
-                    aclib.runAutoTag({
-                        zoneId: "ditm0vjmbq"
-                    });
-                }
-            });
-        </script>
-        """,
-        unsafe_allow_javascript=True,
-    )
-
-
 def select_category(slug: str) -> None:
     """Salva o nicho escolhido durante a sessão do visitante."""
     st.session_state.selected_niche = slug
@@ -140,7 +119,7 @@ if "selected_niche" not in st.session_state:
     st.session_state.selected_niche = "ai_tech"
 
 inject_editorial_ui()
-inject_adcash_autotag()
+AdcashManager.inject_autotag()
 
 with st.sidebar:
     st.markdown(

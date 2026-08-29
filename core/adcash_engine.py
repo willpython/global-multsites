@@ -1,43 +1,92 @@
+import json
+import re
+
 import streamlit as st
-import streamlit.components.v1 as components
+
 
 class AdcashManager:
-    """Gerenciador central de injeção de scripts e zonas Adcash."""
+    """Gerencia o Autotag AdCash com configurações privadas por ambiente."""
 
     @staticmethod
-    def inject_verification_or_autotag(zone_script_url: str):
+    def _get_secret(key: str, default: str = "") -> str:
+        """Lê um secret sem quebrar o app se ele ainda não estiver configurado."""
+        try:
+            return str(st.secrets.get(key, default)).strip()
+        except Exception:
+            return default
+
+    @classmethod
+    def is_enabled(cls) -> bool:
+        """Retorna True somente quando a monetização estiver habilitada."""
+        value = cls._get_secret("ADCASH_ENABLED", "false").lower()
+        return value in {"1", "true", "yes", "on"}
+
+    @classmethod
+    def _get_zone_id(cls) -> str:
+        """Obtém e valida o identificador da zona Autotag."""
+        zone_id = cls._get_secret("ADCASH_AUTOTAG_ZONE_ID").lower()
+
+        if re.fullmatch(r"[a-z0-9]{6,64}", zone_id):
+            return zone_id
+
+        return ""
+
+    @classmethod
+    def inject_autotag(cls) -> bool:
         """
-        Injeta o script global (Autotag / Pop-under / Interstitial) 
-        executando no escopo da página pai (window.top).
+        Carrega a biblioteca AdCash e executa uma zona Autotag uma vez por sessão.
+
+        Retorna True quando o código foi solicitado para carregamento.
         """
-        raw_code = f"""
-        <script type="text/javascript">
-            (function() {{
-                var d = window.top.document;
-                var s = d.createElement('script');
-                s.type = 'text/javascript';
-                s.async = true;
-                s.src = '{zone_script_url}';
-                d.getElementsByTagName('head')[0].appendChild(s);
-            }})();
+        if not cls.is_enabled():
+            return False
+
+        zone_id = cls._get_zone_id()
+
+        if not zone_id:
+            return False
+
+        session_key = "_adcash_autotag_injected"
+
+        if st.session_state.get(session_key):
+            return True
+
+        payload = json.dumps({"zoneId": zone_id})
+
+        script = f"""
+        <script>
+        (function () {{
+            const zoneConfig = {payload};
+            const libraryId = "global-multsites-adcash-library";
+
+            function runAutotag() {{
+                if (typeof window.aclib !== "undefined") {{
+                    window.aclib.runAutoTag(zoneConfig);
+                }}
+            }}
+
+            const existingLibrary = document.getElementById(libraryId);
+
+            if (existingLibrary) {{
+                if (typeof window.aclib !== "undefined") {{
+                    runAutotag();
+                }} else {{
+                    existingLibrary.addEventListener("load", runAutotag, {{ once: true }});
+                }}
+                return;
+            }}
+
+            const library = document.createElement("script");
+            library.id = libraryId;
+            library.type = "text/javascript";
+            library.async = true;
+            library.src = "https://acscdn.com/script/aclib.js";
+            library.addEventListener("load", runAutotag, {{ once: true }});
+            document.head.appendChild(library);
+        }})();
         </script>
         """
-        components.html(raw_code, height=0, width=0)
 
-    @staticmethod
-    def render_display_banner(zone_id: str, width: int = 728, height: int = 90):
-        """
-        Renderiza banners de display Adcash (ex: 728x90 Leaderboard, 300x250 Medium Rectangle).
-        """
-        banner_html = f"""
-        <div style="display:flex; justify-content:center; align-items:center; width:100%;">
-            <script type="text/javascript">
-                aclib.runBanner({{
-                    zoneId: '{zone_id}',
-                    maxHeight: {height},
-                    maxWidth: {width}
-                }});
-            </script>
-        </div>
-        """
-        components.html(banner_html, width=width, height=height)
+        st.html(script)
+        st.session_state[session_key] = True
+        return True

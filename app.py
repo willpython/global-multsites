@@ -1,5 +1,6 @@
 import streamlit as st
 
+st.divider()
 
 st.set_page_config(
     page_title="Global Multsites",

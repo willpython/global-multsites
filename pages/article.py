@@ -47,6 +47,7 @@ post_slug = st.query_params.get("slug", "")
 
 niche, post = get_post(niche_slug, post_slug)
 
+
 if not niche or not post:
     st.error("Artigo não encontrado ou link inválido.")
 
@@ -89,8 +90,6 @@ with center:
         caption=post["alt"],
         use_container_width=True,
     )
-
-    st.divider()
 
     article_content = load_article_markdown(niche_slug, post["slug"])
 
