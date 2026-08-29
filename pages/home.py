@@ -289,3 +289,40 @@ for start in range(0, len(posts), 3):
                             "slug": post["slug"],
                         },
                     )
+
+st.divider()
+
+footer_brand, footer_privacy, footer_terms, footer_contact = st.columns(
+    [3.2, 1.45, 1.15, 0.9],
+    vertical_alignment="center",
+)
+
+with footer_brand:
+    st.caption(
+        "© 2026 Global Multsites · Conteúdo editorial em múltiplos nichos."
+    )
+
+with footer_privacy:
+    if st.button(
+        "Privacidade",
+        key="footer_privacy",
+        use_container_width=True,
+    ):
+        st.switch_page("pages/privacy.py")
+
+with footer_terms:
+    if st.button(
+        "Termos",
+        key="footer_terms",
+        use_container_width=True,
+    ):
+        st.switch_page("pages/terms.py")
+
+with footer_contact:
+    if st.button(
+        "Contato",
+        key="footer_contact",
+        use_container_width=True,
+    ):
+        st.switch_page("pages/contact.py")
+
